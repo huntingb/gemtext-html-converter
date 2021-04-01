@@ -1,6 +1,12 @@
 """
+HUNTER'S SIMPLE GEMTEXT TO HTML CONVERTER
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A simple script that converts gemtext to HTML. Takes two arguments from stdin -
 args[1](gmi) is an input gemtext file and args[2](html) is an output HTML file. 
+You can run it like
+
+python3 input.gmi output.html
+
 The output file consists of only the lines of gemtext in the input file converted
 to their HTML equivalents: <h1>, <h2>, <h3>, <p>, <a>, <blockquote>, <li>, and 
 <pre> tags. It does not include any boilerplate such as a default <head>
@@ -39,7 +45,7 @@ def convert_single_line(gmi_line):
             else:
                 inner_text = groups[0].strip()
                 return f"<{tag}>{inner_text}</{tag}>"
-    return f"<p>{gmi_line.strip()}</p>"
+    return f"<p>{gmi_line}</p>"
             
 # Reads the contents of the input file line by line and outputs HTML. Renders text in preformat blocks (toggled by ```) as multiline <pre> tags.
 def main(args):
@@ -52,16 +58,12 @@ def main(args):
                     preformat = not preformat
                     repl = "<pre>" if preformat else "</pre>"
                     html.write(re.sub(r"```", repl, line))
-                    html.write("\n")
-                    continue
-                if preformat:
+                elif preformat:
                     html.write(line)
-                    html.write("\n")
-                    continue
                 else:
                     html_line = convert_single_line(line)
                     html.write(html_line)
-                    html.write("\n")
+            html.write("\n")
 
 # Main guard
 if __name__ == "__main__":
