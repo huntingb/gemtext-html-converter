@@ -74,9 +74,9 @@ def main(args):
     input = args[1] if len(args) > 1 else "STDIN"
     output = args[2] if len(args) > 2 else "STDOUT"
     
-    with smart_open(input) as gmi, smart_open(output, 'w') as html:
+    with smart_open(input) as gmi, smart_open(output) as html:
         preformat = False
-
+        in_list = False
         for line in gmi:
             line = line.strip()
             if len(line):
@@ -88,8 +88,19 @@ def main(args):
                     html.write(line)
                 else:
                     html_line = convert_single_line(line)
-                    html.write(html_line)
+                    if html_line.startswith("<li>"):
+                        if not in_list:
+                            in_list = True
+                            html.write("<ul>\n")
+                        html.write(html_line)
+                    elif in_list:
+                        in_list = False    
+                        html.write("</ul>\n")
+                        html.write(html_line)
+                    else:
+                        html.write(html_line)
             html.write("\n")
+
 
 # Main guard
 if __name__ == "__main__":
