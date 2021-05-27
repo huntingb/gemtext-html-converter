@@ -49,7 +49,7 @@ def convert_single_line(gmi_line):
                 return f"<{tag}>{inner_text}</{tag}>"
     return f"<p>{gmi_line}</p>"
             
-# smart open for stdin
+# smart open for stdin & stdout
 # credit to https://stackoverflow.com/a/17603000/15956024
 @contextlib.contextmanager
 def smart_open(file_name=None, encoding='r'):
