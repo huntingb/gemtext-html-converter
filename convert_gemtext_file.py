@@ -52,9 +52,9 @@ def convert_single_line(gmi_line):
 # smart open for stdin
 # credit to https://stackoverflow.com/a/17603000/15956024
 @contextlib.contextmanager
-def smart_open(file_name=None):
+def smart_open(file_name=None, encoding='r'):
     if file_name and file_name != 'STDIN' and file_name != 'STDOUT':
-        fh = open(file_name)
+        fh = open(file_name, encoding)
     elif file_name == 'STDIN':
         fh = sys.stdin
     elif file_name == 'STDOUT':
@@ -66,7 +66,7 @@ def smart_open(file_name=None):
     try:
         yield fh
     finally:
-        if fh is not sys.stdin:
+        if fh is not sys.stdin or fh is not sys.stdout:
             fh.close()    
             
 # Reads the contents of the input file line by line and outputs HTML. Renders text in preformat blocks (toggled by ```) as multiline <pre> tags.
@@ -74,7 +74,7 @@ def main(args):
     input = args[1] if len(args) > 1 else "STDIN"
     output = args[2] if len(args) > 2 else "STDOUT"
     
-    with smart_open(input) as gmi, smart_open(output) as html:
+    with smart_open(input) as gmi, smart_open(output, 'w') as html:
         preformat = False
 
         for line in gmi:
