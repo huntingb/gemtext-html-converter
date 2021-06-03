@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 HUNTER'S SIMPLE GEMTEXT TO HTML CONVERTER
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,6 +20,7 @@ hunterkb@ksu.edu
 """
 
 # importing required libraries
+import contextlib
 import sys
 import re
 
@@ -47,10 +49,34 @@ def convert_single_line(gmi_line):
                 return f"<{tag}>{inner_text}</{tag}>"
     return f"<p>{gmi_line}</p>"
             
+# smart open for stdin & stdout
+# credit to https://stackoverflow.com/a/17603000/15956024
+@contextlib.contextmanager
+def smart_open(file_name=None, encoding='r'):
+    if file_name and file_name != 'STDIN' and file_name != 'STDOUT':
+        fh = open(file_name, encoding)
+    elif file_name == 'STDIN':
+        fh = sys.stdin
+    elif file_name == 'STDOUT':
+        fh = sys.stdout
+    else:
+        # will never reach here
+        pass
+
+    try:
+        yield fh
+    finally:
+        if fh is not sys.stdin or fh is not sys.stdout:
+            fh.close()    
+            
 # Reads the contents of the input file line by line and outputs HTML. Renders text in preformat blocks (toggled by ```) as multiline <pre> tags.
 def main(args):
-    with open(args[1]) as gmi, open(args[2], "w") as html:
+    input = args[1] if len(args) > 1 else "STDIN"
+    output = args[2] if len(args) > 2 else "STDOUT"
+    
+    with smart_open(input) as gmi, smart_open(output) as html:
         preformat = False
+        in_list = False
         for line in gmi:
             line = line.strip()
             if len(line):
@@ -62,8 +88,19 @@ def main(args):
                     html.write(line)
                 else:
                     html_line = convert_single_line(line)
-                    html.write(html_line)
+                    if html_line.startswith("<li>"):
+                        if not in_list:
+                            in_list = True
+                            html.write("<ul>\n")
+                        html.write(html_line)
+                    elif in_list:
+                        in_list = False    
+                        html.write("</ul>\n")
+                        html.write(html_line)
+                    else:
+                        html.write(html_line)
             html.write("\n")
+
 
 # Main guard
 if __name__ == "__main__":
