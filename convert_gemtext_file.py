@@ -42,8 +42,8 @@ def convert_single_line(gmi_line):
             groups = match.groups()
             if tag == "a":
                 href = groups[0]
-                inner_text = groups[1].strip() if len(groups) > 1 else href
-                return f"<{tag} href='{href}'>{inner_text}</{tag}>"
+                inner_text = groups[1].strip() if groups[1] else href
+                return f"<{tag} href=\"{href}\">{inner_text}</{tag}><br>"
             else:
                 inner_text = groups[0].strip()
                 return f"<{tag}>{inner_text}</{tag}>"
